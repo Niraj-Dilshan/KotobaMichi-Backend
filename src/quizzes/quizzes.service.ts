@@ -9,7 +9,7 @@ import { DbService } from '@/db/drizzle.service';
 import { CreateQuizDto, SubmitQuizDto } from './dto';
 import { quizzes, quizWords, words, quizAttempts } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
-import { ProgressService } from 'src/progress/progress.service';
+import { ProgressService } from '@/progress/progress.service';
 
 @Injectable()
 export class QuizzesService {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { DbService } from 'src/db/drizzle.service';
-import { userProgress } from 'src/db/schema';
+import { DbService } from '@/db/drizzle.service';
+import { userProgress } from '@/db/schema';
 import { inArray, and, eq } from 'drizzle-orm';
 import { v7 as uuidv7 } from 'uuid';
 
