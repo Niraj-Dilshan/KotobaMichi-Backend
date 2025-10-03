@@ -9,10 +9,14 @@ import { DbService } from '@/db/drizzle.service';
 import { CreateQuizDto, SubmitQuizDto } from './dto';
 import { quizzes, quizWords, words, quizAttempts } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
+import { ProgressService } from '@/progress/progress.service';
 
 @Injectable()
 export class QuizzesService {
-	constructor(private dbService: DbService) {}
+	constructor(
+		private dbService: DbService,
+		private progressService: ProgressService
+	) {}
 	private get db() {
 		return this.dbService.db;
 	}
@@ -259,12 +263,32 @@ export class QuizzesService {
 			})
 			.returning();
 
+		if (!attempt) {
+			// This should not happen in practice with .returning(), but it's good practice
+			// to handle the possibility that the insert operation fails silently.
+			throw new Error('Failed to save quiz attempt');
+		}
+
+		// Update progress for all words in the quiz
+		const correctWords = attached
+			.filter(qw => results.find(r => r.wordId === qw.wordId && r.isCorrect))
+			.map(qw => qw.wordId);
+		const incorrectWords = attached
+			.filter(qw => !results.find(r => r.wordId === qw.wordId && r.isCorrect))
+			.map(qw => qw.wordId);
+
+		await this.progressService.trackProgress(userId, correctWords, 'correct');
+		await this.progressService.trackProgress(
+			userId,
+			incorrectWords,
+			'incorrect'
+		);
+
 		return {
-			attemptId: attempt?.id,
+			message: 'Quiz submitted successfully',
 			score,
-			totalQuestions: attached.length,
-			correctAnswers,
 			results,
+			attemptId: attempt.id,
 		};
 	}
 }

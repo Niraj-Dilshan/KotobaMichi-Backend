@@ -130,6 +130,36 @@ export const quizAttempts = pgTable(
 	]
 );
 
+// User Progress
+export const userProgress = pgTable(
+	'user_progress',
+	{
+		id: varchar('id', { length: 128 }).primaryKey(),
+		userId: varchar('user_id', { length: 128 })
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		wordId: varchar('word_id', { length: 128 })
+			.notNull()
+			.references(() => words.id, { onDelete: 'cascade' }),
+		masteryLevel: integer('mastery_level').notNull().default(0), // e.g., 0-10 scale
+		lastReviewedAt: timestamp('last_reviewed_at', { withTimezone: false }),
+		nextReviewAt: timestamp('next_review_at', { withTimezone: false }),
+		createdAt: timestamp('created_at', { withTimezone: false })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp('updated_at', { withTimezone: false })
+			.notNull()
+			.defaultNow()
+			.$onUpdate(() => new Date()),
+	},
+	t => [
+		uniqueIndex('user_progress_user_word_unique').on(t.userId, t.wordId),
+		index('user_progress_user_idx').on(t.userId),
+		index('user_progress_word_idx').on(t.wordId),
+		index('user_progress_next_review_idx').on(t.nextReviewAt),
+	]
+);
+
 // Refresh Tokens
 export const refreshTokens = pgTable(
 	'refresh_tokens',
