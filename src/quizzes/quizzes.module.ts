@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { QuizzesService } from './quizzes.service';
 import { QuizzesController } from './quizzes.controller';
-import { DrizzleModule } from '@/db/drizzle.module';
+import { QuizzesService } from './quizzes.service';
+import { DrizzleModule } from 'src/db/drizzle.module';
+import { ProgressModule } from 'src/progress/progress.module';
 
 @Module({
-  imports: [DrizzleModule],
+  imports: [DrizzleModule, ProgressModule],
   controllers: [QuizzesController],
   providers: [QuizzesService],
-  exports: [QuizzesService],
 })
 export class QuizzesModule {}
